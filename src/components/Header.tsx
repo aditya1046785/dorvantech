@@ -67,11 +67,11 @@ export function Header() {
           <Link href="/" className="inline-flex items-center" aria-label="DORVANTECH home">
             {!logoError ? (
               <Image
-                src="/brand/logo.svg"
+                src="/brand/logom.png"
                 alt="DORVANTECH"
-                width={140}
-                height={28}
-                className="h-[24px] md:h-[28px] w-auto"
+                width={220}
+                height={44}
+                className="h-[32px] md:h-[40px] w-auto"
                 onError={() => setLogoError(true)}
                 priority
               />

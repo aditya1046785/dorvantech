@@ -201,7 +201,7 @@ export const siteContent = {
         'A complete digital platform for organisational operations.',
       description:
         'DORVANTECH built a connected digital platform combining the foundation’s public website with content management, administrative and member dashboards, payment integration, automated email communication, user authentication, dynamic gallery updates and ID card generation.',
-      url: 'https://nirashrayfoundation.com',
+      url: 'https://nirashray-foundation.vercel.app/',
       tabs: [
         {
           id: 'public-site',
@@ -209,7 +209,7 @@ export const siteContent = {
           description:
             'The foundation’s online presence, connected to the platform behind it.',
           variant: 'page',
-          image: null,
+          image: "/work/nirashray/01-public-site.png",
           alt: 'Public website of Nirashray Foundation',
         },
         {
@@ -218,7 +218,7 @@ export const siteContent = {
           description:
             'Authorised admins update website content from the dashboard, so routine changes need no code.',
           variant: 'editor',
-          image: null,
+          image: "/work/nirashray/02-cms.png",
           alt: 'Content editing screen in the Nirashray dashboard',
         },
         {
@@ -227,7 +227,7 @@ export const siteContent = {
           description:
             'Manage the platform and its operational data in one place.',
           variant: 'dashboard',
-          image: null,
+          image:  "/work/nirashray/03-admin-dashboard.png",
           alt: 'Nirashray admin dashboard',
         },
         {
@@ -236,7 +236,7 @@ export const siteContent = {
           description:
             'A separate experience where members access their own information and features.',
           variant: 'member',
-          image: null,
+          image:  "/work/nirashray/04-member-dashboard.png",
           alt: 'Nirashray member dashboard',
         },
         {
@@ -245,7 +245,7 @@ export const siteContent = {
           description:
             'Payment integration for the foundation’s payment and donation workflows.',
           variant: 'form',
-          image: null,
+          image:  "/work/nirashray/05-payments.png",
           alt: 'Payment screen in the Nirashray platform',
         },
         {
@@ -254,7 +254,7 @@ export const siteContent = {
           description:
             'Custom email setup, with automated emails sent when specific events happen in the platform.',
           variant: 'email',
-          image: null,
+          image:  "/work/nirashray/06-emails.png",
           alt: 'Automated email template sent by the Nirashray platform',
         },
         {
@@ -263,7 +263,7 @@ export const siteContent = {
           description:
             'Account creation and sign-in for the platform’s users.',
           variant: 'login',
-          image: null,
+          image: "/work/nirashray/07-auth.png",
           alt: 'Signup and login screen',
         },
         {
@@ -272,7 +272,7 @@ export const siteContent = {
           description:
             'Admins update the gallery from the dashboard, and the public site reflects it.',
           variant: 'gallery',
-          image: null,
+          image: "/work/nirashray/08-gallery.png",
           alt: 'Gallery managed from the Nirashray dashboard',
         },
         {
@@ -281,7 +281,7 @@ export const siteContent = {
           description:
             'Member ID cards generated from the platform’s member information.',
           variant: 'idcard',
-          image: null,
+          image: "/work/nirashray/09-id-card.png",
           alt: 'Generated member ID card (redacted)',
         },
       ] as NirashrayTab[],

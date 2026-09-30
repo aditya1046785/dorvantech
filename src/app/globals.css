@@ -38,6 +38,7 @@ body {
   font-size: 17px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  zoom: 1.1;
 }
 
 section[id] {
