@@ -9,9 +9,9 @@ import { SchematicFrame } from '@/components/SchematicFrame';
 import { siteContent, type NirashrayTab } from '@/content/site';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export function generateStaticParams() {
@@ -22,19 +22,20 @@ export function generateStaticParams() {
   ];
 }
 
-export function generateMetadata({ params }: PageProps): Metadata {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
   let title = 'Work';
-  if (params.slug === 'nirashray-foundation') title = siteContent.work.nirashray.name;
-  if (params.slug === 'beats') title = siteContent.work.beats.name;
-  if (params.slug === 'ai-career-agent') title = siteContent.work.careerAgent.name;
+  if (slug === 'nirashray-foundation') title = siteContent.work.nirashray.name;
+  if (slug === 'beats') title = siteContent.work.beats.name;
+  if (slug === 'ai-career-agent') title = siteContent.work.careerAgent.name;
 
   return {
     title: `${title} | DORVANTECH`,
   };
 }
 
-export default function WorkCaseStudyPage({ params }: PageProps) {
-  const { slug } = params;
+export default async function WorkCaseStudyPage({ params }: PageProps) {
+  const { slug } = await params;
 
   if (
     slug !== 'nirashray-foundation' &&
