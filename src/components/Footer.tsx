@@ -74,6 +74,15 @@ export function Footer() {
                 </Link>
               </nav>
             </div>
+
+            <div className="col-span-2 flex flex-col gap-3 border-t border-mist pt-5 sm:flex-row sm:gap-6">
+              <Link href="/privacy-policy" className="t-small text-navy hover:underline decoration-signal decoration-2 underline-offset-4">
+                Privacy Policy
+              </Link>
+              <Link href="/terms-of-service" className="t-small text-navy hover:underline decoration-signal decoration-2 underline-offset-4">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
 

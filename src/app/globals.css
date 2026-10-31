@@ -125,6 +125,18 @@ section[id] {
   color: var(--navy);
 }
 
+.legal-copy p,
+.legal-copy ul {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--slate);
+}
+
+.legal-copy p + p { margin-top: 0.85rem; }
+.legal-copy ul { padding-left: 1.25rem; list-style: disc; }
+.legal-copy li + li { margin-top: 0.4rem; }
+
 /* Pattern system */
 .pat-solid {
   background: var(--navy);
