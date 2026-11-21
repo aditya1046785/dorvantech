@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Check } from 'lucide-react';
-import { Button } from '@/components/Button';
-import { siteContent } from '@/content/site';
-import { useInquiryContext } from '@/components/InquiryContext';
+import React, { useState, useEffect, useRef } from "react";
+import { Check, ChevronDown } from "lucide-react";
+import { Button } from "@/components/Button";
+import { siteContent } from "@/content/site";
+import { useInquiryContext } from "@/components/InquiryContext";
 
 interface FormState {
   name: string;
@@ -28,14 +28,14 @@ export function InquiryForm() {
   const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
 
   const [form, setForm] = useState<FormState>({
-    name: '',
-    email: '',
-    phone: '',
-    organisation: '',
+    name: "",
+    email: "",
+    phone: "",
+    organisation: "",
     services: [],
-    message: '',
-    timeline: 'Not sure yet',
-    company_website: '',
+    message: "",
+    timeline: "Not sure yet",
+    company_website: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -55,35 +55,37 @@ export function InquiryForm() {
   }, []);
 
   useEffect(() => {
-    if (selectedService && !form.services.includes(selectedService)) {
+    if (selectedService) {
       setForm((prev) => ({
         ...prev,
-        services: [...prev.services, selectedService],
+        services: prev.services.includes(selectedService)
+          ? prev.services
+          : [...prev.services, selectedService],
       }));
     }
   }, [selectedService]);
 
   const validateField = (name: string, value: string): string | undefined => {
-    if (name === 'name') {
+    if (name === "name") {
       if (!value.trim() || value.trim().length < 2 || value.length > 100) {
-        return 'Enter your name.';
+        return "Enter your name.";
       }
     }
-    if (name === 'email') {
+    if (name === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!value.trim() || !emailRegex.test(value.trim())) {
-        return 'Enter an email address like name@company.com.';
+        return "Enter an email address like name@company.com.";
       }
     }
-    if (name === 'message') {
+    if (name === "message") {
       if (!value.trim() || value.trim().length < 20 || value.length > 2000) {
-        return 'Describe your project in at least 20 characters.';
+        return "Describe your project in at least 20 characters.";
       }
     }
     return undefined;
   };
 
-  const handleBlur = (field: 'name' | 'email' | 'message') => {
+  const handleBlur = (field: "name" | "email" | "message") => {
     const error = validateField(field, form[field]);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
@@ -102,9 +104,9 @@ export function InquiryForm() {
     setHasSubmitted(true);
     setServerError(false);
 
-    const nameErr = validateField('name', form.name);
-    const emailErr = validateField('email', form.email);
-    const msgErr = validateField('message', form.message);
+    const nameErr = validateField("name", form.name);
+    const emailErr = validateField("email", form.email);
+    const msgErr = validateField("message", form.message);
 
     const validationErrors: FormErrors = {
       name: nameErr,
@@ -130,9 +132,9 @@ export function InquiryForm() {
     setSubmitting(true);
 
     try {
-      const response = await fetch('/api/inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
           startedAt,
@@ -140,7 +142,7 @@ export function InquiryForm() {
       });
 
       if (!response.ok) {
-        throw new Error('API submission failed');
+        throw new Error("API submission failed");
       }
 
       setIsSuccess(true);
@@ -156,14 +158,14 @@ export function InquiryForm() {
 
   const resetForm = () => {
     setForm({
-      name: '',
-      email: '',
-      phone: '',
-      organisation: '',
+      name: "",
+      email: "",
+      phone: "",
+      organisation: "",
       services: [],
-      message: '',
-      timeline: 'Not sure yet',
-      company_website: '',
+      message: "",
+      timeline: "Not sure yet",
+      company_website: "",
     });
     setErrors({});
     setHasSubmitted(false);
@@ -172,10 +174,10 @@ export function InquiryForm() {
     setStartedAt(Date.now());
   };
 
-  const firstName = form.name.trim().split(' ')[0] || 'there';
+  const firstName = form.name.trim().split(" ")[0] || "there";
 
   return (
-    <div className="bg-surface border border-mist rounded-xl p-6 sm:p-8 lg:p-10 shadow-none">
+    <div className="inquiry-panel bg-surface border border-mist rounded-xl p-6 sm:p-8 lg:p-10 shadow-none">
       {isSuccess ? (
         <div aria-live="polite" className="flex flex-col items-start py-8">
           <h3
@@ -186,7 +188,8 @@ export function InquiryForm() {
             Message received
           </h3>
           <p className="t-body mt-4">
-            Thanks, {firstName}. We will read your project details and reply by email.
+            Thanks, {firstName}. We will read your project details and reply by
+            email.
           </p>
           <div className="mt-8">
             <Button variant="secondary" onClick={resetForm}>
@@ -195,7 +198,11 @@ export function InquiryForm() {
           </div>
         </div>
       ) : (
-        <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form
+          noValidate
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-6"
+        >
           {/* Honeypot field (hidden) */}
           <div className="sr-only" aria-hidden="true">
             <label htmlFor="company_website">Website</label>
@@ -214,21 +221,36 @@ export function InquiryForm() {
 
           {/* Name */}
           <div className="flex flex-col">
-            <label htmlFor="name" className="t-h4 !text-[15px] font-semibold mb-2">
-              Name <span className="t-caption text-slate font-normal">(required)</span>
+            <label
+              htmlFor="name"
+              className="t-h4 !text-[15px] font-semibold mb-2"
+            >
+              Name{" "}
+              <span className="t-caption text-slate font-normal">
+                (required)
+              </span>
             </label>
             <input
               ref={nameInputRef}
               id="name"
+              required
               type="text"
               autoComplete="name"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              onBlur={() => handleBlur('name')}
+              onChange={(e) => {
+                const value = e.target.value;
+                setForm((prev) => ({ ...prev, name: value }));
+                if (hasSubmitted || errors.name)
+                  setErrors((prev) => ({
+                    ...prev,
+                    name: validateField("name", value),
+                  }));
+              }}
+              onBlur={() => handleBlur("name")}
               aria-invalid={!!errors.name}
-              aria-describedby={errors.name ? 'name-error' : undefined}
+              aria-describedby={errors.name ? "name-error" : undefined}
               className={`h-[52px] rounded-sm border px-4 font-display text-[16px] text-navy bg-paper ${
-                errors.name ? 'border-danger' : 'border-mist'
+                errors.name ? "border-danger" : "border-mist"
               }`}
             />
             {errors.name && (
@@ -240,21 +262,36 @@ export function InquiryForm() {
 
           {/* Email */}
           <div className="flex flex-col">
-            <label htmlFor="email" className="t-h4 !text-[15px] font-semibold mb-2">
-              Email <span className="t-caption text-slate font-normal">(required)</span>
+            <label
+              htmlFor="email"
+              className="t-h4 !text-[15px] font-semibold mb-2"
+            >
+              Email{" "}
+              <span className="t-caption text-slate font-normal">
+                (required)
+              </span>
             </label>
             <input
               ref={emailInputRef}
               id="email"
+              required
               type="email"
               autoComplete="email"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              onBlur={() => handleBlur('email')}
+              onChange={(e) => {
+                const value = e.target.value;
+                setForm((prev) => ({ ...prev, email: value }));
+                if (hasSubmitted || errors.email)
+                  setErrors((prev) => ({
+                    ...prev,
+                    email: validateField("email", value),
+                  }));
+              }}
+              onBlur={() => handleBlur("email")}
               aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? 'email-error' : undefined}
+              aria-describedby={errors.email ? "email-error" : undefined}
               className={`h-[52px] rounded-sm border px-4 font-display text-[16px] text-navy bg-paper ${
-                errors.email ? 'border-danger' : 'border-mist'
+                errors.email ? "border-danger" : "border-mist"
               }`}
             />
             {errors.email && (
@@ -266,8 +303,11 @@ export function InquiryForm() {
 
           {/* Phone */}
           <div className="flex flex-col">
-            <label htmlFor="phone" className="t-h4 !text-[15px] font-semibold mb-2">
-              Phone or WhatsApp
+            <label
+              htmlFor="phone"
+              className="t-h4 !text-[15px] font-semibold mb-2"
+            >
+              Phone or WhatsApp (optional)
             </label>
             <input
               id="phone"
@@ -281,8 +321,11 @@ export function InquiryForm() {
 
           {/* Organisation */}
           <div className="flex flex-col">
-            <label htmlFor="organisation" className="t-h4 !text-[15px] font-semibold mb-2">
-              Organisation
+            <label
+              htmlFor="organisation"
+              className="t-h4 !text-[15px] font-semibold mb-2"
+            >
+              Organisation (optional)
             </label>
             <input
               id="organisation"
@@ -301,7 +344,11 @@ export function InquiryForm() {
             <span className="t-h4 !text-[15px] font-semibold mb-3">
               What do you need?
             </span>
-            <div role="group" aria-label="What do you need" className="flex flex-wrap gap-2">
+            <div
+              role="group"
+              aria-label="What do you need"
+              className="flex flex-wrap gap-2"
+            >
               {siteContent.contact.chips.map((chip) => {
                 const selected = form.services.includes(chip.value);
                 return (
@@ -312,11 +359,13 @@ export function InquiryForm() {
                     onClick={() => toggleService(chip.value)}
                     className={`h-[44px] px-[18px] rounded-full t-small font-medium flex items-center gap-1.5 transition-colors select-none ${
                       selected
-                        ? 'bg-pink-400 text-white'
-                        : 'bg-surface border-[1.5px] border-mist text-slate hover:border-silver'
+                        ? "bg-signal text-paper"
+                        : "bg-surface border-[1.5px] border-mist text-slate hover:border-silver"
                     }`}
                   >
-                    {selected && <Check size={16} strokeWidth={1.75} aria-hidden="true" />}
+                    {selected && (
+                      <Check size={16} strokeWidth={1.75} aria-hidden="true" />
+                    )}
                     <span>{chip.label}</span>
                   </button>
                 );
@@ -326,23 +375,37 @@ export function InquiryForm() {
 
           {/* Message */}
           <div className="flex flex-col">
-            <label htmlFor="message" className="t-h4 !text-[15px] font-semibold mb-2">
-              Tell us about your project{' '}
-              <span className="t-caption text-slate font-normal">(required)</span>
+            <label
+              htmlFor="message"
+              className="t-h4 !text-[15px] font-semibold mb-2"
+            >
+              Tell us about your project{" "}
+              <span className="t-caption text-slate font-normal">
+                (required)
+              </span>
             </label>
             <textarea
               ref={messageInputRef}
               id="message"
+              required
               rows={5}
               maxLength={2000}
               placeholder="What are you trying to achieve? Who will use it? Is anything already in place?"
               value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              onBlur={() => handleBlur('message')}
+              onChange={(e) => {
+                const value = e.target.value;
+                setForm((prev) => ({ ...prev, message: value }));
+                if (hasSubmitted || errors.message)
+                  setErrors((prev) => ({
+                    ...prev,
+                    message: validateField("message", value),
+                  }));
+              }}
+              onBlur={() => handleBlur("message")}
               aria-invalid={!!errors.message}
-              aria-describedby={errors.message ? 'message-error' : undefined}
+              aria-describedby={errors.message ? "message-error" : undefined}
               className={`rounded-sm border p-4 font-display text-[16px] text-navy bg-paper min-h-[160px] resize-y ${
-                errors.message ? 'border-danger' : 'border-mist'
+                errors.message ? "border-danger" : "border-mist"
               }`}
             />
             <div className="flex justify-between items-center mt-1">
@@ -361,7 +424,10 @@ export function InquiryForm() {
 
           {/* Timeline */}
           <div className="flex flex-col">
-            <label htmlFor="timeline" className="t-h4 !text-[15px] font-semibold mb-2">
+            <label
+              htmlFor="timeline"
+              className="t-h4 !text-[15px] font-semibold mb-2"
+            >
               Timeline
             </label>
             <div className="relative">
@@ -373,25 +439,38 @@ export function InquiryForm() {
               >
                 <option value="Not sure yet">Not sure yet</option>
                 <option value="As soon as possible">As soon as possible</option>
-                <option value="Within 1 to 3 months">Within 1 to 3 months</option>
+                <option value="Within 1 to 3 months">
+                  Within 1 to 3 months
+                </option>
                 <option value="3 months or more">3 months or more</option>
               </select>
+              <ChevronDown
+                size={18}
+                aria-hidden="true"
+                className="pointer-events-none absolute right-4 top-4 text-slate"
+              />
             </div>
           </div>
 
           {/* Server Error Alert */}
           {serverError && (
-            <div role="alert" className="rounded-md border border-danger p-4 t-small text-danger bg-danger/5">
+            <div
+              role="alert"
+              className="rounded-md border border-danger p-4 t-small text-danger bg-danger/5"
+            >
               Something went wrong and your message was not sent. Try again
               {contactEmail ? (
                 <>
-                  , or email us at{' '}
-                  <a href={`mailto:${contactEmail}`} className="underline font-semibold">
+                  , or email us at{" "}
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className="underline font-semibold"
+                  >
                     {contactEmail}
                   </a>
                 </>
               ) : (
-                '.'
+                "."
               )}
             </div>
           )}
@@ -411,10 +490,11 @@ export function InquiryForm() {
               disabled={submitting}
               className="w-full"
             >
-              {submitting ? 'Sending…' : 'Send project details'}
+              {submitting ? "Sending…" : "Send project details"}
             </Button>
             <span className="t-caption text-slate mt-3 text-left">
-              We reply by email. Your details are used only to respond to your inquiry.
+              We reply by email. Your details are used only to respond to your
+              inquiry.
             </span>
           </div>
         </form>

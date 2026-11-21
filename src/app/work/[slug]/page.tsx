@@ -1,129 +1,111 @@
-import React from 'react';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Button } from '@/components/Button';
-import { SchematicFrame } from '@/components/SchematicFrame';
-import { siteContent, type NirashrayTab } from '@/content/site';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { ProductVisual } from "@/components/ProductVisual";
+import { siteContent } from "@/content/site";
 
-interface PageProps {
-  params: Promise<{
-    slug: string;
-  }>;
-}
-
+const projects = {
+  "nirashray-foundation": {
+    data: siteContent.work.nirashray,
+    kind: "foundation" as const,
+  },
+  beats: { data: siteContent.work.beats, kind: "beats" as const },
+  "ai-career-agent": {
+    data: siteContent.work.careerAgent,
+    kind: "career" as const,
+  },
+};
+type Props = { params: Promise<{ slug: string }> };
 export function generateStaticParams() {
-  return [
-    { slug: 'nirashray-foundation' },
-    { slug: 'beats' },
-    { slug: 'ai-career-agent' },
-  ];
+  return Object.keys(projects).map((slug) => ({ slug }));
 }
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  let title = 'Work';
-  if (slug === 'nirashray-foundation') title = siteContent.work.nirashray.name;
-  if (slug === 'beats') title = siteContent.work.beats.name;
-  if (slug === 'ai-career-agent') title = siteContent.work.careerAgent.name;
-
-  return {
-    title: `${title} | DORVANTECH`,
-  };
+function projectFor(slug: string) {
+  if (!Object.hasOwn(projects, slug)) notFound();
+  return projects[slug as keyof typeof projects];
 }
-
-export default async function WorkCaseStudyPage({ params }: PageProps) {
-  const { slug } = await params;
-
-  if (
-    slug !== 'nirashray-foundation' &&
-    slug !== 'beats' &&
-    slug !== 'ai-career-agent'
-  ) {
-    notFound();
-  }
-
-  const isNirashray = slug === 'nirashray-foundation';
-  const isBeats = slug === 'beats';
-
-  const data = isNirashray
-    ? siteContent.work.nirashray
-    : isBeats
-    ? siteContent.work.beats
-    : siteContent.work.careerAgent;
-
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { data } = projectFor((await params).slug);
+  return { title: `${data.name} | DORVANTECH`, description: data.description };
+}
+export default async function WorkCaseStudyPage({ params }: Props) {
+  const { data, kind } = projectFor((await params).slug);
   return (
     <>
       <Header />
-      <main id="main" className="pt-12 pb-24 bg-paper min-h-screen">
-        <div className="container">
-          <Link href="/#work" className="link t-small inline-block mb-8">
-            Back to all work
+      <main id="main">
+        <section className="section-wrap case-hero">
+          <Link href="/#work" className="text-link">
+            Back to selected work
           </Link>
-
-          <h1 className="t-h2">{data.name}</h1>
-          <h2 className="t-h3 mt-3 text-navy font-medium">{data.positioning}</h2>
-          <p className="t-body mt-4 max-w-[62ch]">{data.description}</p>
-
-          {/* Features / Flow section */}
-          <div className="mt-16 border-t border-mist pt-10">
-            {isNirashray ? (
-              <div>
-                <h3 className="t-h3">Features</h3>
-                <dl className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {(data as typeof siteContent.work.nirashray).tabs.map((tab) => (
-                    <div key={tab.id} className="flex flex-col">
-                      <dt className="t-h4">{tab.label}</dt>
-                      <dd className="t-body mt-1 text-slate">{tab.description}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            ) : (
-              <div>
-                <h3 className="t-h3">How it works</h3>
-                <ol className="mt-6 flex flex-col gap-3 list-decimal list-inside">
-                  {(data as typeof siteContent.work.beats).flowNodes.map((node) => (
-                    <li key={node} className="t-body text-navy font-medium">
-                      <span className="text-slate font-normal">{node}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
-          </div>
-
-          {/* Screenshots Grid (Nirashray only until owner adds assets for others) */}
-          {isNirashray && (
-            <div className="mt-16 border-t border-mist pt-10">
-              <h3 className="t-h3">Screenshots</h3>
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                {(data as typeof siteContent.work.nirashray).tabs.map((tab: NirashrayTab) => (
-                  <div key={tab.id} className="flex flex-col">
-                    <SchematicFrame
-                      variant={tab.variant}
-                      imageSrc={tab.image}
-                      alt={tab.alt}
-                    />
-                    <span className="t-caption mt-2 text-slate">{tab.label}</span>
+          <p className="eyebrow mt-10">DORVANTECH / SELECTED WORK</p>
+          <h1 className="t-display">{data.name}</h1>
+          <h2 className="t-h3">{data.positioning}</h2>
+          <p className="t-lead mt-6">{data.description}</p>
+          {data.url && (
+            <a
+              className="action action-secondary mt-7"
+              href={data.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Visit live project{" "}
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+          )}
+          <ProductVisual kind={kind} />
+        </section>
+        <section className="section-wrap section-space !pt-8">
+          <p className="eyebrow">THE SYSTEM BEHIND THE EXPERIENCE</p>
+          <h2 className="mt-4">
+            {kind === "foundation"
+              ? "Connected from end to end."
+              : "A clear path to a useful outcome."}
+          </h2>
+          {kind === "foundation" ? (
+            <>
+              <div className="case-feature-grid">
+                {siteContent.work.nirashray.tabs.map((tab) => (
+                  <div key={tab.id}>
+                    <h3>{tab.label}</h3>
+                    <p>{tab.description}</p>
                   </div>
                 ))}
               </div>
-            </div>
+              <div className="mt-12">
+                <h3 className="t-h3">
+                  {siteContent.work.nirashray.strip.title}
+                </h3>
+                <p className="t-body mt-4">
+                  {siteContent.work.nirashray.strip.caption}
+                </p>
+              </div>
+            </>
+          ) : (
+            <ol className="case-flow">
+              {("flowNodes" in data ? data.flowNodes : []).map((node, i) => (
+                <li key={node}>
+                  <span>STEP {i + 1}</span>
+                  {node}
+                </li>
+              ))}
+            </ol>
           )}
-
-          {/* Final Call to Action */}
-          <div className="mt-20 border-t border-mist pt-16">
-            <h2 className="t-h2">Have an idea? Let&apos;s build it.</h2>
-            <div className="mt-6">
-              <Button variant="primary" href="/#contact">
-                Discuss your project
-              </Button>
-            </div>
+        </section>
+        <section className="section-band">
+          <div className="section-wrap section-space">
+            <p className="eyebrow">YOUR BUSINESS, NEXT</p>
+            <h2 className="mt-4">
+              Have something in mind?
+              <br />
+              <span>Let’s build it together.</span>
+            </h2>
+            <Link href="/#contact" className="action action-primary mt-8">
+              Discuss your project
+            </Link>
           </div>
-        </div>
+        </section>
       </main>
       <Footer />
     </>
