@@ -1,0 +1,52 @@
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+ directUrl = env("DIRECT_URL")
+}
+model AdminUser {
+ id String @id @default("owner")
+ email String @unique
+ passwordHash String
+ totpSecret String
+ recoveryCodes String[]
+ lastTotpStep BigInt @default(0)
+ sessions Session[]
+}
+model Session {
+ id String @id
+ userId String
+ user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+ createdAt DateTime @default(now())
+ lastSeen DateTime @default(now())
+ expiresAt DateTime
+}
+model Project {
+ id String @id @default(cuid())
+ slug String @unique
+ status String @default("DRAFT")
+ position Int @default(0)
+ homepage Boolean @default(true)
+ draft Json
+ published Json?
+ version Int @default(1)
+ updatedAt DateTime @updatedAt
+ createdAt DateTime @default(now())
+}
+model SiteSettings {
+ id String @id @default("site")
+ featuredId String?
+}
+model AuditLog {
+ id String @id @default(cuid())
+ action String
+ projectId String?
+ createdAt DateTime @default(now())
+}
+model AuthThrottle {
+ id String @id
+ attempts Int @default(0)
+ resetAt DateTime
+}

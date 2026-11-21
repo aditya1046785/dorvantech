@@ -1,32 +1,14 @@
-import { MetadataRoute } from 'next';
-
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://dorvantech.in';
-
+import type { MetadataRoute } from "next";
+import { publicProjects } from "@/lib/projects";
+export const dynamic = "force-dynamic";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dorvantech.in";
+  const projects = await publicProjects();
   return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/work/nirashray-foundation`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/work/beats`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/work/ai-career-agent`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
+    { url: base },
+    ...(projects ?? []).map((p) => ({
+      url: `${base}/work/${p.slug}`,
+      lastModified: p.updatedAt,
+    })),
   ];
 }

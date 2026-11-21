@@ -1,111 +1,39 @@
-import Link from "next/link";
+import LegacyCase, { legacyMetadata } from "@/components/LegacyCase";
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import { publicProjects } from "@/lib/projects";
+import { CaseContent } from "@/components/ManagedProjects";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { ProductVisual } from "@/components/ProductVisual";
-import { siteContent } from "@/content/site";
-
-const projects = {
-  "nirashray-foundation": {
-    data: siteContent.work.nirashray,
-    kind: "foundation" as const,
-  },
-  beats: { data: siteContent.work.beats, kind: "beats" as const },
-  "ai-career-agent": {
-    data: siteContent.work.careerAgent,
-    kind: "career" as const,
-  },
-};
-type Props = { params: Promise<{ slug: string }> };
-export function generateStaticParams() {
-  return Object.keys(projects).map((slug) => ({ slug }));
+export const dynamic = "force-dynamic";
+async function find(slug: string) {
+  const p = (await publicProjects())?.find((p) => p.slug === slug);
+  if (!p) notFound();
+  return p;
 }
-function projectFor(slug: string) {
-  if (!Object.hasOwn(projects, slug)) notFound();
-  return projects[slug as keyof typeof projects];
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  if (!process.env.DATABASE_URL) return legacyMetadata({ params });
+  const { content: c } = await find((await params).slug);
+  return {
+    title: `${c.seoTitle || c.title} | DORVANTECH`,
+    description: c.seoDescription || c.summary,
+  };
 }
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { data } = projectFor((await params).slug);
-  return { title: `${data.name} | DORVANTECH`, description: data.description };
-}
-export default async function WorkCaseStudyPage({ params }: Props) {
-  const { data, kind } = projectFor((await params).slug);
+export default async function Case({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  if (!process.env.DATABASE_URL) return <LegacyCase params={params} />;
+  const p = await find((await params).slug);
   return (
     <>
       <Header />
       <main id="main">
-        <section className="section-wrap case-hero">
-          <Link href="/#work" className="text-link">
-            Back to selected work
-          </Link>
-          <p className="eyebrow mt-10">DORVANTECH / SELECTED WORK</p>
-          <h1 className="t-display">{data.name}</h1>
-          <h2 className="t-h3">{data.positioning}</h2>
-          <p className="t-lead mt-6">{data.description}</p>
-          {data.url && (
-            <a
-              className="action action-secondary mt-7"
-              href={data.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Visit live project{" "}
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-          )}
-          <ProductVisual kind={kind} />
-        </section>
-        <section className="section-wrap section-space !pt-8">
-          <p className="eyebrow">THE SYSTEM BEHIND THE EXPERIENCE</p>
-          <h2 className="mt-4">
-            {kind === "foundation"
-              ? "Connected from end to end."
-              : "A clear path to a useful outcome."}
-          </h2>
-          {kind === "foundation" ? (
-            <>
-              <div className="case-feature-grid">
-                {siteContent.work.nirashray.tabs.map((tab) => (
-                  <div key={tab.id}>
-                    <h3>{tab.label}</h3>
-                    <p>{tab.description}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-12">
-                <h3 className="t-h3">
-                  {siteContent.work.nirashray.strip.title}
-                </h3>
-                <p className="t-body mt-4">
-                  {siteContent.work.nirashray.strip.caption}
-                </p>
-              </div>
-            </>
-          ) : (
-            <ol className="case-flow">
-              {("flowNodes" in data ? data.flowNodes : []).map((node, i) => (
-                <li key={node}>
-                  <span>STEP {i + 1}</span>
-                  {node}
-                </li>
-              ))}
-            </ol>
-          )}
-        </section>
-        <section className="section-band">
-          <div className="section-wrap section-space">
-            <p className="eyebrow">YOUR BUSINESS, NEXT</p>
-            <h2 className="mt-4">
-              Have something in mind?
-              <br />
-              <span>Let’s build it together.</span>
-            </h2>
-            <Link href="/#contact" className="action action-primary mt-8">
-              Discuss your project
-            </Link>
-          </div>
-        </section>
+        <CaseContent content={p.content} />
       </main>
       <Footer />
     </>

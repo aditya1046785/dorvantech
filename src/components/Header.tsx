@@ -31,11 +31,7 @@ export function Header() {
       <header className="site-header">
         <div className="section-wrap header-inner">
           <Link href="/" className="wordmark" aria-label="DORVANTECH home">
-            <span className="brand-mark" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
+            
             DORVANTECH<span className="brand-period">.</span>
           </Link>
           <button
