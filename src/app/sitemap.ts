@@ -7,6 +7,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [projects, vacancies] = await Promise.all([publicProjects(), publicVacancies()]);
   return [
     { url: base },
+    { url: `${base}/work` },
     { url: `${base}/careers` },
     ...(vacancies ?? []).filter((v) => v.open).map((v) => ({url: `${base}/careers/${v.slug}`})),
     ...(projects ?? []).map((p) => ({

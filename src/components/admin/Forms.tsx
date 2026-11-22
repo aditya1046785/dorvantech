@@ -196,6 +196,7 @@ export function ProjectForm({
           />
           Show on homepage
         </label>
+        <small>Eligible for one of 3 homepage spots. The featured project appears first, followed by project order. All published projects appear on the full portfolio page.</small>
       </div>
       <div className="adm-glass">
         <h2>Case study</h2>

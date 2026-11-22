@@ -110,6 +110,7 @@ export async function logout() {
 }
 function refresh(slug?: string) {
   revalidatePath("/");
+  revalidatePath("/work");
   revalidatePath("/sitemap.xml");
   revalidatePath("/aditya");
   if (slug) revalidatePath(`/work/${slug}`);

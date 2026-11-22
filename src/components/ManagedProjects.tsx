@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LegacyWork } from "./LegacyWork";
 import { ProductVisual } from "./ProductVisual";
 import { publicProjects } from "@/lib/projects";
+import { selectHomepageProjects } from "@/lib/project-selection";
 import { db } from "@/lib/db";
 import type { ProjectContent } from "@/lib/project-schema";
 export function CodeVisual({ content: c }: { content: ProjectContent }) {
@@ -160,14 +161,11 @@ export function CaseContent({ content: c }: { content: ProjectContent }) {
     </>
   );
 }
-export async function ManagedProjects() {
-  const projects = await publicProjects();
-  if (projects === null) return <LegacyWork />;
-  if (!projects.some((p) => p.homepage)) return null;
-  const settings = await db.siteSettings.findUnique({ where: { id: "site" } });
-  const visible = projects.filter((p) => p.homepage);
-  const featured = visible.find((p) => p.id === settings?.featuredId);
-  const card = (p: (typeof visible)[number], large = false) => (
+export function ProjectCard({ project: p, large = false }: {
+  project: NonNullable<Awaited<ReturnType<typeof publicProjects>>>[number];
+  large?: boolean;
+}) {
+  return (
     <article key={p.id} className={large ? "featured-project" : "project-card"}>
       <Link href={`/work/${p.slug}`} aria-label={`Explore ${p.content.title}`}>
         <CodeVisual content={p.content} />
@@ -187,6 +185,14 @@ export async function ManagedProjects() {
       </div>
     </article>
   );
+}
+
+export async function ManagedProjects() {
+  const projects = await publicProjects();
+  if (projects === null) return <LegacyWork />;
+  const settings = await db.siteSettings.findUnique({ where: { id: "site" } });
+  const { visible, featured } = selectHomepageProjects(projects, settings?.featuredId);
+  if (!visible.length) return null;
   return (
     <section id="work" className="section-wrap section-space">
       <div className="section-heading">
@@ -203,10 +209,15 @@ export async function ManagedProjects() {
           what we build.
         </p>
       </div>
-      {featured && card(featured, true)}
+      {featured && <ProjectCard project={featured} large />}
       <div className="project-grid">
-        {visible.filter((p) => p.id !== featured?.id).map((p) => card(p))}
+        {visible.filter((p) => p.id !== featured?.id).map((p) => <ProjectCard key={p.id} project={p} />)}
       </div>
+      {projects.length > visible.length && (
+        <div className="work-actions">
+          <Link className="action" href="/work">View all projects</Link>
+        </div>
+      )}
     </section>
   );
 }
