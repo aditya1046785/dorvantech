@@ -31,7 +31,7 @@ export function decrypt(s: string) {
 }
 export async function session() {
   const token = (await cookies()).get("owner-session")?.value;
-  if (!token || !process.env.DATABASE_URL) return null;
+  if (!token || !process.env.DATABASE_URL_POOLED) return null;
   const s = await db.session.findUnique({ where: { id: digest(token) } });
   if (
     !s ||

@@ -1,3 +1,4 @@
+import { VacanciesSection } from "@/components/VacanciesSection";
 import { ManagedProjects } from "@/components/ManagedProjects";
 import Link from "next/link";
 import { Header } from "@/components/Header";
@@ -205,6 +206,8 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
+        <VacanciesSection />
 
         <section id="faq" className="section-wrap section-space faq-layout">
           <div>

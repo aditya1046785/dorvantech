@@ -10,6 +10,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <nav>
           <Link href="/aditya">Overview</Link>
           <Link href="/aditya#projects">Projects</Link>
+          <Link href="/aditya/internships">Internships</Link>
+          <Link href="/aditya/internships/applications">Applicants</Link>
+          <Link href="/aditya/internships/settings">Recruitment settings</Link>
           <Link href="/aditya/security">Security</Link>
           <a href="/" target="_blank" rel="noreferrer">
             View website ↗

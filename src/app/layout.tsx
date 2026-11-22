@@ -53,7 +53,11 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${display.variable} ${mono.variable}`}
+    >
       <head>
         <script
           type="application/ld+json"

@@ -3,8 +3,8 @@ generator client {
 }
 datasource db {
  provider = "postgresql"
- url = env("DATABASE_URL")
- directUrl = env("DIRECT_URL")
+ url = env("DATABASE_URL_POOLED")
+ directUrl = env("DATABASE_URL")
 }
 model AdminUser {
  id String @id @default("owner")
@@ -49,4 +49,120 @@ model AuthThrottle {
  id String @id
  attempts Int @default(0)
  resetAt DateTime
+}
+
+model Vacancy {
+ id String @id @default(cuid())
+ slug String @unique
+ status VacancyStatus @default(DRAFT)
+ draft Json
+ published Json?
+ version Int @default(1)
+ publishedRevision Int @default(0)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ revisions VacancyRevision[]
+ applications Application[]
+}
+
+enum VacancyStatus {
+ DRAFT
+ PUBLISHED
+ CLOSED
+ ARCHIVED
+}
+
+model VacancyRevision {
+ id String @id @default(cuid())
+ vacancyId String
+ vacancy Vacancy @relation(fields: [vacancyId], references: [id], onDelete: Restrict)
+ revision Int
+ content Json
+ applications Application[]
+ createdAt DateTime @default(now())
+ @@unique([vacancyId, revision])
+}
+
+model Application {
+ id String @id @default(cuid())
+ registration String @unique
+ requestKey String @unique
+ vacancyId String
+ vacancy Vacancy @relation(fields: [vacancyId], references: [id], onDelete: Restrict)
+ revisionId String
+ revision VacancyRevision @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+ email String
+ name String
+ answers Json
+ status String @default("NEW")
+ consentVersion String
+ createdAt DateTime @default(now())
+ resumeId String @unique
+ resume ResumeObject @relation(fields: [resumeId], references: [id], onDelete: Restrict)
+ confirmation ConfirmationEmail?
+ finalizedAt DateTime?
+ version Int @default(1)
+ activity ApplicationActivity[]
+ @@unique([vacancyId, email])
+ @@index([vacancyId, createdAt])
+}
+
+model ResumeObject {
+ id String @id @default(cuid())
+ objectKey String @unique
+ filename String
+ size Int
+ scannedAt DateTime
+ createdAt DateTime @default(now())
+ application Application?
+ deleteAfter DateTime?
+}
+
+model ConfirmationEmail {
+ id String @id @default(cuid())
+ applicationId String @unique
+ application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+ payload Json
+ status String @default("PENDING")
+ attempts Int @default(0)
+ nextAttempt DateTime @default(now())
+ lockedUntil DateTime?
+ providerId String?
+ createdAt DateTime @default(now())
+ sentAt DateTime?
+ deliveryStatus String @default("UNKNOWN")
+ deliveryUpdatedAt DateTime?
+}
+
+model ApplicationActivity {
+ id String @id @default(cuid())
+ applicationId String
+ application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+ kind String
+ body String?
+ fromStatus String?
+ toStatus String?
+ actor String @default("owner")
+ createdAt DateTime @default(now())
+ @@index([applicationId, createdAt])
+}
+
+model RecruitmentSettings {
+ id String @id @default("recruitment")
+ retentionDays Int @default(180)
+ autoDelete Boolean @default(false)
+ version Int @default(1)
+ updatedAt DateTime @updatedAt
+}
+
+model RecruitmentWebhookEvent {
+ id String @id
+ providerId String
+ type String
+ occurredAt DateTime
+ receivedAt DateTime @default(now())
+ appliedAt DateTime?
+ nextCheck DateTime @default(now())
+ @@index([providerId])
+ @@index([appliedAt, receivedAt])
 }

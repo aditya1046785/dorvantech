@@ -24,7 +24,7 @@ export default async function Dashboard({
           </h1>
           <p>Sign in to curate projects and publish your next chapter.</p>
           <LoginForm />
-          {!process.env.DATABASE_URL && (
+          {!process.env.DATABASE_URL_POOLED && (
             <p>Connect PostgreSQL and run owner setup to enable sign in.</p>
           )}
         </section>

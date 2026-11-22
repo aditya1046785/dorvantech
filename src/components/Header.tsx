@@ -60,6 +60,7 @@ export function Header() {
                 {label}
               </Link>
             ))}
+            <Link href="/careers" onClick={() => setOpen(false)}>Vacancies</Link>
             <Link
               className="action action-small"
               href="/#contact"

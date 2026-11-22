@@ -2,7 +2,7 @@ import "server-only";
 import { db } from "./db";
 import { contentSchema } from "./project-schema";
 export async function publicProjects() {
-  if (!process.env.DATABASE_URL) return null;
+  if (!process.env.DATABASE_URL_POOLED) return null;
   const rows = await db.project.findMany({
     where: { status: "PUBLISHED" },
     orderBy: [{ position: "asc" }, { id: "asc" }],

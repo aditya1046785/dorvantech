@@ -1695,3 +1695,80 @@ h2 span {
     width: 100%;
   }
 }
+
+/* Careers shares the public site's type, colors and spacing. */
+.careers-intro { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+.careers-intro h2 { font-size:clamp(32px,4vw,52px); line-height:1.15; letter-spacing:-.035em; }
+.careers-intro h2 span, .careers-heading h1 span { color:var(--silver); }
+.careers-intro .careers-count { margin:20px 0; color:var(--navy); }
+.careers-page { padding-block:64px 112px; }
+.careers-heading { margin:56px 0; max-width:840px; }
+.careers-heading h1 { font-size:clamp(36px,6vw,72px); line-height:1.08; letter-spacing:-.045em; margin:20px 0 24px; overflow-wrap:anywhere; }
+.careers-heading > p:last-child { max-width:640px; font-size:18px; }
+.careers-list-heading { display:flex; justify-content:space-between; gap:24px; align-items:center; margin-bottom:24px; }
+.careers-list-heading h2, .vacancy-card h2 { font-size:24px; line-height:1.3; }
+.vacancy-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.vacancy-card { border:1px solid var(--mist); background:var(--sunken); border-radius:16px; padding:32px; display:flex; flex-direction:column; align-items:flex-start; gap:20px; overflow-wrap:anywhere; }
+.vacancy-card h2 a { text-decoration:none; }
+.vacancy-card h2 a:hover { text-decoration:underline; text-underline-offset:5px; }
+.vacancy-card > .action { margin-top:auto; }
+.vacancy-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; width:100%; margin:8px 0; }
+.vacancy-facts dt { color:var(--silver); font-size:14px; margin-bottom:4px; }
+.vacancy-facts dd { margin:0; color:var(--navy); overflow-wrap:anywhere; }
+.vacancy-detail { max-width:960px; }
+.vacancy-detail-facts { border-block:1px solid var(--mist); padding-block:32px; }
+.vacancy-description { max-width:760px; }
+.vacancy-description section { margin-top:48px; }
+.vacancy-description h2 { font-size:26px; line-height:1.3; margin-bottom:16px; }
+.vacancy-description p { white-space:pre-wrap; overflow-wrap:anywhere; }
+.careers-empty, .careers-apply { border:1px solid var(--mist); border-radius:16px; padding:40px; }
+.careers-empty p, .careers-apply p { margin:16px 0 24px; }
+.careers-apply { margin-top:56px; background:var(--sunken); }
+.careers-apply button:disabled { cursor:not-allowed; }
+.careers-apply .careers-help { margin-bottom:0; font-size:14px; }
+.careers-notice { padding:20px; border:1px solid var(--mist); border-radius:12px; margin-bottom:24px; color:var(--navy); }
+@media (max-width:760px) {
+  .careers-intro, .vacancy-grid { grid-template-columns:1fr; gap:32px; }
+  .careers-page { padding-block:40px 72px; }
+  .careers-heading { margin:40px 0; }
+  .vacancy-card, .careers-empty, .careers-apply { padding:24px; }
+}
+@media (max-width:420px) { .vacancy-facts { grid-template-columns:1fr; gap:16px; } }
+
+.application-page { max-width:860px; padding-block:40px 80px; }
+.application-top { display:flex; justify-content:space-between; gap:24px; align-items:center; padding-block:24px; border-bottom:1px solid var(--mist); }
+.application-top > div > p:last-child { color:var(--navy); margin-top:8px; }
+.application-preview-notice { border:1px solid var(--mist); background:var(--sunken); border-radius:12px; padding:16px 20px; font-size:14px; }
+.application-progress { display:flex; align-items:center; gap:24px; justify-content:space-between; margin-block:32px; font-size:14px; }
+.application-progress progress { max-width:180px; width:35%; height:5px; accent-color:var(--signal); }
+.application-question { padding-block:24px; animation:application-enter .22s ease-out; }
+.application-question h1 { font-size:clamp(30px,4vw,44px); line-height:1.2; letter-spacing:-.035em; margin-bottom:24px; }
+.application-question h1:focus { outline:none; }
+.application-question > label:not(.application-consent) { display:block; color:var(--navy); margin:24px 0 10px; }
+.application-question > input, .application-question > textarea, .application-question > select { width:100%; min-height:56px; padding:16px; border:1px solid var(--silver); border-radius:10px; background:var(--sunken); color:var(--navy); }
+.application-question > textarea { resize:vertical; }
+.application-question [aria-invalid="true"] { border-color:#ff9b9b; }
+.application-question input[type="file"] { font-size:14px; }
+.application-question input[type="file"]::file-selector-button { background:var(--surface); color:var(--navy); border:1px solid var(--mist); border-radius:6px; padding:8px 12px; margin-right:12px; cursor:pointer; }
+.application-help { color:var(--slate); margin-block:12px; }
+.application-controls { display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin-top:16px; }
+.application-skip, .application-back, .application-footer button, .application-review button { background:none; border:0; color:var(--slate); padding:8px 0; text-decoration:underline; text-underline-offset:4px; min-height:44px; }
+.application-back { margin-left:auto; }
+.application-error { color:#ffadad; margin-block:12px; }
+.application-footer { margin-top:56px; border-top:1px solid var(--mist); padding-top:24px; font-size:14px; }
+.application-review { margin-block:24px; }
+.application-review > div { position:relative; border-bottom:1px solid var(--mist); padding:20px 100px 20px 0; }
+.application-review dt { font-size:14px; color:var(--silver); }
+.application-review dd { margin:8px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--navy); }
+.application-review button { position:absolute; right:0; top:20px; font-size:14px; }
+.application-consent { display:flex; gap:12px; margin-block:24px; align-items:flex-start; font-size:14px; }
+.application-consent input { flex-shrink:0; margin-top:5px; width:18px; height:18px; accent-color:var(--signal); }
+.application-question > .application-preview-notice { margin-block:24px; }
+@keyframes application-enter { from {opacity:0;transform:translateY(6px);} to {opacity:1;transform:translateY(0);} }
+@media (prefers-reduced-motion:reduce) { .application-question { animation:none; } }
+@media (max-width:600px) { .application-top { align-items:flex-start; } .application-review > div { padding-right:70px; } .application-progress { gap:12px; } }
+.application-fieldset { border:0; margin:0; padding:0; min-width:0; }
+.application-receipt { margin-block:24px; overflow-wrap:anywhere; color:var(--navy); }
+.careers-owner-setup { margin-top:24px; overflow-wrap:anywhere; }
+.careers-owner-setup ul { padding-left:24px; margin-block:16px; }
+.careers-owner-setup p { margin-bottom:16px; }

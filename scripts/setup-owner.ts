@@ -3,19 +3,52 @@ import { hash } from "@node-rs/argon2";
 import { TOTP } from "otpauth";
 import { createCipheriv, randomBytes, createHash } from "node:crypto";
 import { createInterface } from "node:readline/promises";
+import { Writable } from "node:stream";
 async function main() {
   const db = new PrismaClient();
+  let hidden = false;
+  const output = new Writable({
+    write(chunk, encoding, callback) {
+      if (!hidden) process.stdout.write(chunk, encoding);
+      callback();
+    },
+  });
   const input = createInterface({
     input: process.stdin,
-    output: process.stdout,
+    output,
+    terminal: Boolean(process.stdin.isTTY),
   });
+  async function askPassword(prompt: string) {
+    if (!process.stdin.isTTY)
+      throw Error(
+        "Run owner setup in an interactive terminal to enter a password.",
+      );
+    process.stdout.write(prompt);
+    hidden = true;
+    try {
+      return await input.question("");
+    } finally {
+      hidden = false;
+      process.stdout.write("\n");
+    }
+  }
   try {
     const email = (await input.question("Owner email: ")).trim().toLowerCase();
-    // Read from environment to avoid echoing a password into terminal output.
-    const password = process.env.OWNER_PASSWORD;
+    const password =
+      process.env.OWNER_PASSWORD ||
+      (await askPassword(
+        "Choose a password (16–256 characters; typing is hidden): ",
+      ));
     const key = process.env.AUTH_ENCRYPTION_KEY;
     if (!password || password.length < 16 || password.length > 256)
-      throw Error("Set OWNER_PASSWORD to 16–256 characters for this command.");
+      throw Error(
+        "Password must contain 16–256 characters. Run owner setup again and choose a longer password.",
+      );
+    if (
+      !process.env.OWNER_PASSWORD &&
+      password !== (await askPassword("Confirm password (typing is hidden): "))
+    )
+      throw Error("Passwords do not match. Run owner setup again.");
     if (!key || !/^[a-f0-9]{64}$/i.test(key))
       throw Error("Set AUTH_ENCRYPTION_KEY to a 32-byte hex key.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))

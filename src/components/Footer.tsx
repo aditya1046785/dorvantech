@@ -18,6 +18,7 @@ export function Footer() {
             <Link href="/#work">Our work</Link>
             <Link href="/#services">Services</Link>
             <Link href="/#process">Our process</Link>
+            <Link href="/careers">Internships & vacancies</Link>
             <Link href="/#contact">Start a conversation</Link>
           </nav>
           <nav aria-label="Project navigation">

@@ -7,11 +7,12 @@ import { verify, hash } from "@node-rs/argon2";
 import { TOTP, Secret } from "otpauth";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { isDatabaseUnavailable } from "@/lib/database-errors";
 import { decrypt, digest, requireOwner } from "@/lib/auth";
 import { contentSchema, slugSchema } from "@/lib/project-schema";
 export type Result = { error?: string; success?: string; id?: string };
 export async function login(_: Result, form: FormData): Promise<Result> {
-  if (!process.env.DATABASE_URL)
+  if (!process.env.DATABASE_URL_POOLED)
     return { error: "Database setup is required. See the setup guide." };
   const h = await headers();
   if (
@@ -19,66 +20,86 @@ export async function login(_: Result, form: FormData): Promise<Result> {
     new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").origin
   )
     return { error: "Request origin is not allowed." };
-  const bucket = digest("owner-login");
-  const throttle = await db.authThrottle.upsert({
-    where: { id: bucket },
-    create: { id: bucket, attempts: 1, resetAt: new Date(Date.now() + 900000) },
-    update: { attempts: { increment: 1 } },
-  });
-  if (throttle.resetAt < new Date())
-    await db.authThrottle.update({
+  try {
+    const bucket = digest("owner-login");
+    const throttle = await db.authThrottle.upsert({
       where: { id: bucket },
-      data: { attempts: 1, resetAt: new Date(Date.now() + 900000) },
+      create: {
+        id: bucket,
+        attempts: 1,
+        resetAt: new Date(Date.now() + 900000),
+      },
+      update: { attempts: { increment: 1 } },
     });
-  else if (throttle.attempts > 5)
-    return { error: "Too many attempts. Try again in 15 minutes." };
-  const owner = await db.adminUser.findUnique({ where: { id: "owner" } });
-  const password = String(form.get("password") || "");
-  if (
-    password.length > 256 ||
-    !owner ||
-    owner.email !== String(form.get("email")).toLowerCase() ||
-    !(await verify(owner.passwordHash, password))
-  )
-    return { error: "Unable to sign in. Check your credentials." };
-  const otp = new TOTP({
-    secret: Secret.fromBase32(decrypt(owner.totpSecret)),
-  });
-  const code = String(form.get("code"));
-  const recovery = digest(code);
-  const isRecovery = owner.recoveryCodes.includes(recovery);
-  const delta = isRecovery ? 0 : otp.validate({ token: code, window: 1 });
-  const step = BigInt(Math.floor(Date.now() / 30000) + (delta ?? 0));
-  if (delta === null)
-    return { error: "Unable to sign in. Check your credentials." };
-  const used = isRecovery
-    ? await db.adminUser.updateMany({
-        where: { id: "owner", recoveryCodes: { equals: owner.recoveryCodes } },
-        data: {
-          recoveryCodes: owner.recoveryCodes.filter((c) => c !== recovery),
-        },
-      })
-    : await db.adminUser.updateMany({
-        where: { id: "owner", lastTotpStep: { lt: step } },
-        data: { lastTotpStep: step },
+    if (throttle.resetAt < new Date())
+      await db.authThrottle.update({
+        where: { id: bucket },
+        data: { attempts: 1, resetAt: new Date(Date.now() + 900000) },
       });
-  if (!used.count)
-    return { error: "Code already used. Wait for the next code." };
-  const token = randomBytes(32).toString("hex");
-  await db.session.create({
-    data: {
-      id: digest(token),
-      userId: owner.id,
-      expiresAt: new Date(Date.now() + 43200000),
-    },
-  });
-  (await cookies()).set("owner-session", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-    maxAge: 43200,
-  });
+    else if (throttle.attempts > 5)
+      return { error: "Too many attempts. Try again in 15 minutes." };
+    const owner = await db.adminUser.findUnique({ where: { id: "owner" } });
+    const password = String(form.get("password") || "");
+    if (
+      password.length > 256 ||
+      !owner ||
+      owner.email !== String(form.get("email")).toLowerCase() ||
+      !(await verify(owner.passwordHash, password))
+    )
+      return { error: "Unable to sign in. Check your credentials." };
+    const otp = new TOTP({
+      secret: Secret.fromBase32(decrypt(owner.totpSecret)),
+    });
+    const code = String(form.get("code"));
+    const recovery = digest(code);
+    const isRecovery = owner.recoveryCodes.includes(recovery);
+    const delta = isRecovery ? 0 : otp.validate({ token: code, window: 1 });
+    const step = BigInt(Math.floor(Date.now() / 30000) + (delta ?? 0));
+    if (delta === null)
+      return { error: "Unable to sign in. Check your credentials." };
+    const used = isRecovery
+      ? await db.adminUser.updateMany({
+          where: {
+            id: "owner",
+            recoveryCodes: { equals: owner.recoveryCodes },
+          },
+          data: {
+            recoveryCodes: owner.recoveryCodes.filter((c) => c !== recovery),
+          },
+        })
+      : await db.adminUser.updateMany({
+          where: { id: "owner", lastTotpStep: { lt: step } },
+          data: { lastTotpStep: step },
+        });
+    if (!used.count)
+      return { error: "Code already used. Wait for the next code." };
+    const token = randomBytes(32).toString("hex");
+    await db.session.create({
+      data: {
+        id: digest(token),
+        userId: owner.id,
+        expiresAt: new Date(Date.now() + 43200000),
+      },
+    });
+    (await cookies()).set("owner-session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 43200,
+    });
+  } catch (error) {
+    if (isDatabaseUnavailable(error)) {
+      // Keep the outage fail-closed, but don't expose a Prisma stack/connection
+      // details in the browser or turn the sign-in form into an error overlay.
+      console.error("Owner login: database connection unavailable.");
+      return {
+        error:
+          "The database is temporarily unavailable. Please try signing in again shortly.",
+      };
+    }
+    throw error;
+  }
   redirect("/aditya");
 }
 export async function logout() {
